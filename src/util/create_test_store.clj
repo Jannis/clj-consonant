@@ -1,7 +1,7 @@
 (ns util.create-test-store
   (:require [clj-jgit.porcelain :refer :all]
             [clj-uuid :as uuid]
-            [me.raynes.fs :refer [temp-dir]]
+            [me.raynes.fs :refer [delete-dir exists? mkdirs temp-dir]]
             [util.jgit :refer :all]
             [util.transit :refer :all]))
 
@@ -23,11 +23,14 @@
        (create-class repo "users")))
 
 (defn run
-  []
-  (let [dir (temp-dir "clj-consonant")]
-    (println dir)
-    (git-init dir)
-    (with-repo dir
+  [test-dir]
+  (let [dirname test-dir]
+    (println dirname)
+    (when (exists? dirname)
+      (delete-dir dirname))
+    (mkdirs dirname)
+    (git-init dirname)
+    (with-repo dirname
       (let [users-tree (create-users repo)
             root-tree  (git-create-tree repo [users-tree])
             author     (git-identity "Jannis Pohlmann" "jannis@xfce.org")]
