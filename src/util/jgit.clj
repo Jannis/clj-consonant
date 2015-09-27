@@ -17,7 +17,7 @@
 
 (defn git-ref
   [repo name]
-  (.getRet (.getRepository repo) name))
+  (.getRef (.getRepository repo) name))
 
 (defn git-refs
   [repo]

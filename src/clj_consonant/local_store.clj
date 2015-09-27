@@ -19,6 +19,13 @@
   [store oid]
   (.open (.getRepository (:repo store)) oid))
 
+(defn- is-annotated-tag
+  [store ref]
+  (->> (.getObjectId ref)
+       (object-loader store)
+       (.getType)
+       (= Constants/OBJ_TAG)))
+
 ; Git object parsing
 
 (defn- parse-ident
@@ -49,41 +56,39 @@
   [store oid]
   (let [tag    (.parseTag (revwalk store) oid)
         commit (.getObject tag)]
-    {:sha1        (.getName oid)
-     :tagger      (parse-ident (.getTaggerIdent tag))
-     :tagger-date (parse-ident-time (.getTaggerIdent tag))
-     :subject     (.getShortMessage tag)
-     :parents     [(.getName (.getId commit))]}))
+    {:head (parse-commit store (.getId (.getObject tag)))
+     :tag  {:sha1        (.getName oid)
+            :tagger      (parse-ident (.getTaggerIdent tag))
+            :tagger-date (parse-ident-time (.getTaggerIdent tag))
+            :subject     (.getShortMessage tag)}}))
 
-(defmulti parse-ref (fn [store name ref] (->> (str/split name #"/")
-                                              (take 2)
-                                              (str/join "/"))))
+(defmulti parse-ref (fn [store ref] (->> (str/split (.getName ref) #"/")
+                                         (take 2)
+                                         (str/join "/"))))
 
 (defmethod parse-ref "HEAD"
-  [store name ref]
+  [store ref]
   {:type "branch"
    :url-aliases ["HEAD"]
    :head (parse-commit store (.. ref (getLeaf) (getObjectId)))})
 
 (defmethod parse-ref "refs/heads"
-  [store name ref]
+  [store ref]
   {:type "branch"
-   :url-aliases [(str/replace name "/" ":")]
+   :url-aliases [(str/replace (.getName ref) "/" ":")]
    :head (parse-commit store (.. ref (getLeaf) (getObjectId)))})
 
 (defmethod parse-ref "refs/tags"
-  [store name ref]
-  (println "IN" (.. ref getObjectId toString)
-                (.. ref getLeaf getObjectId toString))
-  {:type "tag"
-   :url-aliases [(str/replace name "/" ":")]
-   :head (condp = (.getType (object-loader store (.getObjectId ref)))
-           Constants/OBJ_TAG    (parse-tag store (.getObjectId ref))
-           Constants/OBJ_COMMIT (parse-commit store (.getObjectId ref)))})
+  [store ref]
+  (merge {:type "tag"
+          :url-aliases [(str/replace (.getName ref) "/" ":")]}
+         (if (is-annotated-tag store ref)
+           (parse-tag store (.getObjectId ref))
+           {:head (parse-commit store (.getObjectId ref))})))
 
 (defn- parse-refs
   [store refs]
-  (into {} (for [[k v] refs] [k (parse-ref store k v)])))
+  (into {} (for [[name ref] refs] [name (parse-ref store ref)])))
 
 ; Local store implementation
 
@@ -96,11 +101,16 @@
   (disconnect [this]
     (assoc this :repo nil))
 
-  (refs [this]
+  (get-refs [this]
     (if (:repo this)
       (->> (git-refs (:repo this))
            (parse-refs this))
-      {})))
+      {}))
+
+  (get-ref [this alias]
+    (if (:repo this)
+      (->> (git-ref (:repo this) alias)
+           (parse-ref this)))))
 
 (defn local-store
   ([location]

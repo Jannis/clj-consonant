@@ -41,8 +41,6 @@
                                                  author
                                                  "Tag the first commit"
                                                  commit)]
-            ; atag       (git-update-ref real-repo "refs/tags/annotated-tag" atag-obj)]
         (println "commit  " commit)
         (println "head    " head)
-        ; (println "atag obj" atag-obj)
         (println "atag    " atag)))))

@@ -26,12 +26,58 @@
 
 (deftest local-store-has-refs
   (let [s  (local-store test-dir)
-        rs (refs s)]
-    (pprint rs)
+        rs (get-refs s)]
     (is (map? rs))
-    (and (is (contains? rs "HEAD"))
-         (let [ref (get rs "HEAD")]
-           (is (= "branch" (:type ref)))))
-    (and (is (contains? rs "refs/heads/master"))
-         (let [ref (get rs "refs/heads/master")]
-           (is (= "branch" (:type ref)))))))
+    ; Contains HEAD
+    (is (contains? rs "HEAD"))
+    (let [r    (get rs "HEAD")
+          head (:head r)]
+      (is (= "branch" (:type r)))
+      (is (map? head))
+      (is (= 40 (count (:sha1 head))))
+      (is (= "Jannis Pohlmann <jannis@xfce.org>" (:author head))))
+    ; Contains master
+    (is (contains? rs "refs/heads/master"))
+    (let [r    (get rs "refs/heads/master")
+          head (:head r)]
+      (is (= "branch" (:type r)))
+      (is (map? head))
+      (is (= 40 (count (:sha1 head)))))
+    ; Contains an annotated tag
+    (is (contains? rs "refs/tags/annotated-tag"))
+    (let [r    (get rs "refs/tags/annotated-tag")
+          head (:head r)
+          tag  (:tag r)]
+      (is (= "tag" (:type r)))
+      (is (map? head))
+      (is (= 40 (count (:sha1 head))))
+      (is (map? tag))
+      (is (= 40 (count (:sha1 tag)))))))
+
+(deftest local-store-has-head-ref
+  (let [s (local-store test-dir)
+        r (get-ref s "HEAD")]
+    (is (map? r))
+    (is (= "branch" (:type r)))
+    (is (= 1 (count (:url-aliases r))))
+    (is (some #{"HEAD"} (:url-aliases r)))
+    (let [head (:head r)]
+      (is (map? head))
+      (is (= 40 (count (:sha1 head))))
+      (is (= "Jannis Pohlmann <jannis@xfce.org>" (:author head)))
+      (is (= "Jannis Pohlmann <jannis@xfce.org>" (:committer head)))
+      (is (= "First commit" (:subject head))))))
+
+(deftest local-store-has-master-ref
+  (let [s (local-store test-dir)
+        r (get-ref s "refs/heads/master")]
+    (is (map? r))
+    (is (= "branch" (:type r)))
+    (is (= 1 (count (:url-aliases r))))
+    (is (some #{"refs:heads:master"} (:url-aliases r)))
+    (let [head (:head r)]
+      (is (map? head))
+      (is (= 40 (count (:sha1 head))))
+      (is (= "Jannis Pohlmann <jannis@xfce.org>" (:author head)))
+      (is (= "Jannis Pohlmann <jannis@xfce.org>" (:committer head)))
+      (is (= "First commit" (:subject head))))))
