@@ -1,6 +1,6 @@
 (ns util.transit
   (:require [cognitect.transit :as transit])
-  (:import [java.io ByteArrayOutputStream]))
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (defn transit-write
   [data]
@@ -9,3 +9,10 @@
         (transit/writer :json)
         (transit/write data))
     (.toString stream)))
+
+(defn transit-read
+  [data]
+  (let [stream (ByteArrayInputStream. data)]
+    (-> stream
+        (transit/reader :json)
+        (transit/read))))

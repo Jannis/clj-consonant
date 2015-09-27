@@ -81,3 +81,54 @@
       (is (= "Jannis Pohlmann <jannis@xfce.org>" (:author head)))
       (is (= "Jannis Pohlmann <jannis@xfce.org>" (:committer head)))
       (is (= "First commit" (:subject head))))))
+
+(deftest local-store-has-classes
+  (let [s  (local-store test-dir)
+        cs (get-classes s)]
+    (is (map? cs))
+    (is (contains? cs "users"))
+    (let [c (get cs "users")]
+      (is (contains? c :name))
+      (is (= "users" (:name c)))
+      (is (contains? c :objects))
+      (let [objects (:objects c)]
+        (is (= 2 (count objects)))))))
+
+(deftest local-store-has-class
+  (let [s (local-store test-dir)
+        c (get-class s "users")]
+    (is (contains? c :name))
+    (is (= "users" (:name c)))
+    (is (contains? c :objects))
+    (let [objects (:objects c)]
+      (is (= 2 (count objects))))))
+
+(deftest local-store-has-objects
+  (let [s  (local-store test-dir)
+        os (get-objects s "users")]
+    (println "objects")
+    (pprint os)))
+
+(deftest local-store-has-object
+  (let [s    (local-store test-dir)
+        os   (get-class s "users")
+        uuid (-> os :objects first :uuid)
+        o    (get-object s "users" uuid)]
+    (println "object")
+    (pprint o)))
+
+(deftest local-store-has-properties
+  (let [s    (local-store test-dir)
+        os   (get-class s "users")
+        uuid (-> os :objects first :uuid)
+        ps   (get-properties s "users" uuid)]
+    (println "properties")
+    (pprint ps)))
+
+(deftest local-store-has-property
+  (let [s    (local-store test-dir)
+        os   (get-class s "users")
+        uuid (-> os :objects first :uuid)
+        p    (get-property s "users" uuid :name)]
+    (println "property")
+    (pprint p)))
