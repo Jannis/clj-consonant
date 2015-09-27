@@ -33,7 +33,16 @@
     (with-repo dirname
       (let [users-tree (create-users repo)
             root-tree  (git-create-tree repo [users-tree])
-            author     (git-identity "Jannis Pohlmann" "jannis@xfce.org")]
-        (->> (git-create-commit repo author "First commit" root-tree)
-             (git-update-ref repo "HEAD")
-             (println))))))
+            author     (git-identity "Jannis Pohlmann" "jannis@xfce.org")
+            commit     (git-create-commit repo author "First commit" root-tree)
+            head       (git-update-ref repo "HEAD" commit)
+            atag       (git-create-annotated-tag repo
+                                                 "annotated-tag"
+                                                 author
+                                                 "Tag the first commit"
+                                                 commit)]
+            ; atag       (git-update-ref real-repo "refs/tags/annotated-tag" atag-obj)]
+        (println "commit  " commit)
+        (println "head    " head)
+        ; (println "atag obj" atag-obj)
+        (println "atag    " atag)))))

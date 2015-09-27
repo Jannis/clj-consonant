@@ -6,7 +6,10 @@
             Constants
             FileMode
             PersonIdent
-            TreeFormatter]))
+            TagBuilder
+            TreeFormatter]
+           [org.eclipse.jgit.revwalk
+            RevWalk]))
 
 (defn git-identity
   [name email]
@@ -14,11 +17,15 @@
 
 (defn git-ref
   [repo name]
-  (.. repo getRepository (getRef name)))
+  (.getRet (.getRepository repo) name))
+
+(defn git-refs
+  [repo]
+  (.getAllRefs (.getRepository repo)))
 
 (defn git-object-inserter
   [repo]
-  (.. repo getRepository newObjectInserter))
+  (.newObjectInserter (.getRepository repo)))
 
 (defn git-create-blob
   [repo data]
@@ -40,7 +47,7 @@
 
 (defn git-create-commit
   [repo author subject tree]
-  (let [builder  (CommitBuilder.)]
+  (let [builder (CommitBuilder.)]
     (.setMessage builder subject)
     (.setTreeId builder (:oid tree))
     (.setAuthor builder author)
@@ -48,11 +55,21 @@
     (let [inserter (git-object-inserter repo)
           oid      (.insert inserter builder)]
       (.flush inserter)
-      oid)))
+      (.parseCommit (RevWalk. (.getRepository repo)) oid))))
 
 (defn git-update-ref
-  [repo refname commit-id]
-  (let [refdb  (ref-database repo)
-        update (.newUpdate refdb refname false)]
-    (.setNewObjectId update commit-id)
+  [repo refname commit]
+  (let [update (.updateRef (.getRepository repo) refname)]
+    (.setNewObjectId update (.getId commit))
     (.update update)))
+
+(defn git-create-annotated-tag
+  [repo name tagger subject commit]
+  (.. repo
+      (tag)
+      (setName name)
+      (setTagger tagger)
+      (setMessage subject)
+      (setAnnotated true)
+      (setObjectId commit)
+      (call)))

@@ -8,6 +8,7 @@
                   [boot-environ "1.0.1"]
 
                   ; General
+                  [clj-time "0.11.0"]
                   [com.cognitect/transit-clj "0.8.281"]
                   [environ "1.0.1"]
 
@@ -23,10 +24,6 @@
 (require '[adzerk.boot-test :refer :all]
          '[environ.boot :refer [environ]]
          '[environ.core :refer [env]])
-
-; (require '[clj-consonant.store :as store])
-;
-; (println store)
 
 (deftask create-test-store
   "Create and populate test store"
