@@ -1,4 +1,4 @@
-(ns util.jgit
+(ns clj-consonant.git
   (:require [clj-jgit.internal :refer [ref-database]]
             [clj-jgit.porcelain :refer :all])
   (:import [org.eclipse.jgit.lib

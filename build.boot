@@ -1,8 +1,8 @@
 #!/usr/bin/env boot
 
 (set-env!
-  :source-paths #{"src" "test"}
-  :resource-paths #{}
+  :source-paths #{"test"}
+  :resource-paths #{"src"}
   :dependencies '[; Boot
                   [adzerk/boot-reload "0.3.1"]
                   [adzerk/boot-test "1.0.4"]

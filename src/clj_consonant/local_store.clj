@@ -4,9 +4,9 @@
             [clj-time.coerce :refer [from-date to-epoch]]
             [clj-time.core :refer [time-zone-for-offset to-time-zone]]
             [clj-time.format :refer [formatter unparse]]
-            [util.jgit :refer :all]
-            [util.transit :refer [transit-read]]
-            [clj-consonant.store :refer :all])
+            [clj-consonant.git :refer :all]
+            [clj-consonant.store :refer :all]
+            [clj-consonant.transit :refer [transit-read]])
   (:import [org.eclipse.jgit.lib Constants]
            [org.eclipse.jgit.revwalk RevCommit RevWalk]
            [org.eclipse.jgit.treewalk TreeWalk]))

@@ -2,8 +2,8 @@
   (:require [clj-jgit.porcelain :refer :all]
             [clj-uuid :as uuid]
             [me.raynes.fs :refer [delete-dir exists? mkdirs temp-dir]]
-            [util.jgit :refer :all]
-            [util.transit :refer :all]))
+            [clj-consonant.git :refer :all]
+            [clj-consonant.transit :refer :all]))
 
 (def USERS [{:name "Jannis Pohlmann" :email "jannis@xfce.org"}
             {:name "Simon Steinbeiß" :email "simon@xfce.org"}])

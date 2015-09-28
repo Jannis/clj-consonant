@@ -1,4 +1,4 @@
-(ns util.transit
+(ns clj-consonant.transit
   (:require [cognitect.transit :as transit])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
