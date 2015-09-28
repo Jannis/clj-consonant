@@ -237,9 +237,9 @@
 
   (get-property [this ref-alias class-name uuid name]
     (when (:repo this)
-      (->> (get-object this ref-alias class-name uuid)
-           :properties
-           name))))
+      (let [object (get-object this ref-alias class-name uuid)]
+        (or (get-in object [:properties name])
+            (get-in object [:properties (keyword name)]))))))
 
 (defn local-store
   ([location]
