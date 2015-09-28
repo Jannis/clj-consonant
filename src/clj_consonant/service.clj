@@ -10,8 +10,8 @@
 
 (def data-store (atom nil))
 
-(defn load-store []
-  (reset! data-store (local-store "/tmp/clj-consonant-test")))
+(defn load-store [path]
+  (reset! data-store (local-store path)))
 
 ;;;; Helpers
 
@@ -135,7 +135,7 @@
 
 (def service
   (do
-    (load-store)
+    (load-store (System/getProperty "consonant-service-store"))
     (-> service-routes
         (wrap-404)
         (wrap-transit-json-params)

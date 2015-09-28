@@ -41,8 +41,11 @@
 
 (deftask service
   "Launch a Consonant service"
-  []
+  [s store PATH str "Consonant store to serve"]
   (comp
+    (with-pre-wrap fileset
+      (System/setProperty "consonant-service-store" store)
+      fileset)
     (serve :port 8080
            :httpkit true
            :reload true
