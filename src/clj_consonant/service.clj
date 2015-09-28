@@ -129,7 +129,7 @@
     (let [resp (handler request)]
       (case (:body resp)
         nil   {:status 404 :body "Not found"}
-        :else resp))))
+              resp))))
 
 ;;;; Consonant service
 
