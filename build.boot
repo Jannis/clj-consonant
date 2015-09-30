@@ -57,7 +57,8 @@
            :httpkit true
            :reload true
            :handler 'clj-consonant.service/service)
-    (watch)))
+    (watch)
+    (speak)))
 
 (deftask deploy
   "Deploy to Maven"

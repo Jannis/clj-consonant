@@ -92,9 +92,9 @@
        (response))))
 
 (defn handle-transaction
-  [params]
-  (println "handle-transaction" params)
-  (response "Hello"))
+  [actions]
+  (-> (store/transact! @data-store actions)
+      (response)))
 
 ;;;; Routes
 
