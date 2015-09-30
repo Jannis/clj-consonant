@@ -4,6 +4,7 @@
   :source-paths #{"test"}
   :resource-paths #{"src"}
   :dependencies '[; Boot
+                  [adzerk/boot-cljs "1.7.48-5-SNAPSHOT"]
                   [adzerk/boot-test "1.0.4"]
                   [boot-environ "1.0.1"]
                   [pandeiro/boot-http "0.6.3"]
@@ -17,6 +18,11 @@
                   [environ "1.0.1"]
                   [ring/ring-core "1.4.0"]
                   [ring-middleware-format "0.6.0"]
+                  [ring.middleware.logger "0.5.0"]
+
+                  ; Client
+                  [org.clojure/clojurescript "1.7.48"]
+                  [cljs-ajax "0.3.14"]
 
                   ; Utilities
                   [me.raynes/fs "1.4.6"]])
@@ -25,7 +31,8 @@
   pom {:project 'clj-consonant
        :version "0.1.0-SNAPSHOT"})
 
-(require '[adzerk.boot-test :refer :all]
+(require '[adzerk.boot-cljs :refer :all]
+         '[adzerk.boot-test :refer :all]
          '[environ.boot :refer [environ]]
          '[environ.core :refer [env]]
          '[pandeiro.boot-http :refer [serve]])
@@ -51,3 +58,12 @@
            :reload true
            :handler 'clj-consonant.service/service)
     (watch)))
+
+(deftask deploy
+  "Deploy to Maven"
+  []
+  (comp
+    (cljs)
+    (pom)
+    (jar)
+    (install)))

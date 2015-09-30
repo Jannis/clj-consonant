@@ -74,14 +74,15 @@
 
 (defn- parse-commit
   [store oid]
-  (let [commit (.parseCommit (rev-walk store) oid)]
-    {:sha1           (.getName oid)
-     :author         (parse-ident (.getAuthorIdent commit))
-     :author-date    (parse-ident-time (.getAuthorIdent commit))
-     :committer      (parse-ident (.getCommitterIdent commit))
-     :committer-date (parse-ident-time (.getCommitterIdent commit))
-     :subject        (.getShortMessage commit)
-     :parents        (mapv #(.getId %) (.getParents commit))}))
+  (when oid
+    (let [commit (.parseCommit (rev-walk store) oid)]
+      {:sha1           (.getName oid)
+       :author         (parse-ident (.getAuthorIdent commit))
+       :author-date    (parse-ident-time (.getAuthorIdent commit))
+       :committer      (parse-ident (.getCommitterIdent commit))
+       :committer-date (parse-ident-time (.getCommitterIdent commit))
+       :subject        (.getShortMessage commit)
+       :parents        (mapv #(.getId %) (.getParents commit))})))
 
 (defn parse-tag
   [store oid]
@@ -93,9 +94,10 @@
             :tagger-date (parse-ident-time (.getTaggerIdent tag))
             :subject     (.getShortMessage tag)}}))
 
-(defmulti parse-ref (fn [store ref] (->> (str/split (.getName ref) #"/")
-                                         (take 2)
-                                         (str/join "/"))))
+(defmulti parse-ref (fn [store ref] (when ref
+                                      (->> (str/split (.getName ref) #"/")
+                                           (take 2)
+                                           (str/join "/")))))
 
 (defmethod parse-ref "HEAD"
   [store ref]
@@ -117,11 +119,19 @@
            (parse-tag store (.getObjectId ref))
            {:head (parse-commit store (.getObjectId ref))})))
 
+(defmethod parse-ref :default
+  [store ref]
+  nil)
+
 (defn- parse-refs
   [store refs]
   (into {} (for [[name ref] refs] [name (parse-ref store ref)])))
 
 ; Local store implementation
+
+(defn load-ref
+  [store ref-alias]
+  (git-ref (:repo store) ref-alias))
 
 (defn load-class
   [store commit class-name]
@@ -178,7 +188,7 @@
 
   (get-ref [this ref-alias]
     (when (:repo this)
-      (->> (git-ref (:repo this) ref-alias)
+      (->> (load-ref this ref-alias)
            (parse-ref this))))
 
   (get-classes [this]
