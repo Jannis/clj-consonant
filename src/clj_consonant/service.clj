@@ -93,8 +93,9 @@
 
 (defn handle-transaction
   [actions]
-  (-> (store/transact! @data-store actions)
-      (response)))
+  (when actions
+    (-> (store/transact! @data-store actions)
+        (response))))
 
 ;;;; Routes
 

@@ -1,9 +1,13 @@
 (ns clj-consonant.git.commit
+  (:import [org.eclipse.jgit.lib CommitBuilder])
   (:refer-clojure :exclude [load])
   (:require [clj-consonant.git.coerce :refer [to-oid]]
             [clj-consonant.git.ident :as ident]
-            [clj-consonant.git.repo :refer [rev-walk]]
+            [clj-consonant.git.repo :refer [object-inserter rev-walk]]
             [clj-consonant.git.tree :as git-tree]))
+
+(defn commit-builder []
+  (CommitBuilder.))
 
 (defrecord Commit [sha1
                    author
@@ -35,3 +39,16 @@
        (.getTree)
        (.getId)
        (git-tree/load repo)))
+
+(defn make [repo tree parents & {:keys [author committer message]}]
+  (let [builder (commit-builder)]
+    (.setTreeId builder (to-oid repo (:sha1 tree)))
+    (doseq [parent parents]
+      (.addParentId builder (to-oid repo (:sha1 parent))))
+    (.setAuthor builder (ident/to-jident author))
+    (.setCommitter builder (ident/to-jident committer))
+    (.setMessage builder message)
+    (let [inserter (object-inserter repo)
+          oid      (.insert inserter builder)]
+      (.flush inserter)
+      (load repo oid))))

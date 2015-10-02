@@ -1,4 +1,13 @@
-(ns clj-consonant.transaction)
+(ns clj-consonant.transaction
+  (:refer-clojure :exclude [run!])
+  (:require [clojure.string :as str]
+            [clj-consonant.git.coerce :refer [to-oid]]
+            [clj-consonant.git.commit :as git-commit]
+            [clj-consonant.git.ident :as ident]
+            [clj-consonant.git.reference :as reference]
+            [clj-consonant.git.tree :as tree]
+            [clj-consonant.classes :as classes]
+            [clj-consonant.objects :as objects]))
 
 ;;;; JGit helpers
 
@@ -67,3 +76,54 @@
 ;        (update-ref store (:target action)))
 ;   (->> (load-ref store (:target action))
 ;        (parse-ref store)))
+
+(defmulti run-action (fn [_ _ _ action] (:action action)))
+
+(defmethod run-action :begin
+  [store actions _ action]
+  (println "run-action" :begin)
+  (if (= (:source action) (str/join (repeat 40 "0")))
+      (tree/make-empty (:repo store))
+      (->> (git-commit/load (:repo store) (to-oid (:source action)))
+           (git-commit/tree (:repo store)))))
+
+(defmethod run-action :create
+  [store actions tree action]
+  (println "run-action" :create tree)
+  (let [class-name   (:class action)
+        class-tree   (or (tree/get-tree (:repo store) tree class-name)
+                         (tree/make-empty (:repo store)))
+        _            (println "class-tree" class-tree)
+        object       (objects/make class-name (:properties action))
+        _            (println "object" object)
+        object-blob  (objects/make-blob (:repo store) object)
+        _            (println "object-blob" object-blob)
+        object-entry (objects/to-tree-entry object object-blob)]
+    (->> object-entry
+         (tree/update (:repo store) class-tree)
+         (tree/to-tree-entry class-name)
+         (tree/update (:repo store) tree))))
+
+(defmethod run-action :commit
+  [store actions tree action]
+  (println "run-action" :commit tree)
+  (let [begin   (first actions)
+        source  (when-not (= (:source begin) (str/join (repeat 40 "0")))
+                  (to-oid (:repo store) (:source begin)))
+        parent  (when source
+                  (git-commit/load (:repo store) source))
+        parents (if parent [parent] [])
+        commit  (git-commit/make (:repo store)
+                                 tree
+                                 parents
+                                 :author (ident/from-map (:author action))
+                                 :committer (ident/from-map (:committer action))
+                                 :message (:message action))
+        target  (reference/load (:repo store) (:target action))]
+    (println "COMMIT" commit)
+    (println "TARGET" target)
+    nil))
+
+(defn run! [store actions]
+  (when store
+    (reduce (partial run-action store actions) nil actions)))

@@ -1,6 +1,7 @@
 (ns clj-consonant.git.repo
   (:import [org.eclipse.jgit.revwalk RevWalk]
            [org.eclipse.jgit.treewalk TreeWalk])
+  (:refer-clojure :exclude [load])
   (:require [clj-jgit.porcelain :refer [load-repo]]))
 
 ;;;; Loading repositories

@@ -4,7 +4,8 @@
             [clj-consonant.git.reference :as reference]
             [clj-consonant.classes :as classes]
             [clj-consonant.objects :as objects]
-            [clj-consonant.store :refer :all]))
+            [clj-consonant.store :refer :all]
+            [clj-consonant.transaction :as transaction]))
 
 ;;;; Local store implementation
 
@@ -79,9 +80,8 @@
             (get-in object [:properties (keyword name)])))))
 
   (transact! [this actions]
-    ))
-    ; (when (:repo this)
-    ;   (reduce (partial apply-action this) :start actions))))
+    (when (:repo this)
+      (transaction/run! this actions))))
 
 (defn local-store
   ([location]

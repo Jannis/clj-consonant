@@ -5,14 +5,12 @@
   {:action :begin
    :source source})
 
-(defn end
-  [& {:keys [target author author-date committer committer-date message]}]
-  {:action         :end
+(defn commit
+  [& {:keys [target author committer message]}]
+  {:action         :commit
    :target         target
    :author         author
-   :author-date    author-date
    :committer      committer
-   :committer-date committer-date
    :message        message})
 
 (defn create
