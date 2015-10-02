@@ -1,5 +1,5 @@
 (ns clj-consonant.git.reference
-  (:import [org.eclipse.jgit.lib Constants])
+  (:import [org.eclipse.jgit.lib Constants RefUpdate RefUpdate$Result])
   (:refer-clojure :exclude [load])
   (:require [clojure.string :as str]
             [clj-consonant.git.coerce :refer [to-alias to-oid]]
@@ -34,3 +34,20 @@
   (into {}
     (for [[name ref] (.getAllRefs (.getRepository repo))]
       [name (to-reference repo ref)])))
+
+(defn update! [repo ref commit]
+  (let [update (.updateRef (.getRepository repo) (:name ref))]
+    (.setNewObjectId update (to-oid repo (:sha1 commit)))
+    (let [result (.update update)]
+      (println result)
+      (condp =
+        RefUpdate$Result/FAST_FORWARD            true
+        RefUpdate$Result/FORCED                  true
+        RefUpdate$Result/NEW                     true
+        RefUpdate$Result/NO_CHANGE               true
+        RefUpdate$Result/RENAMED                 true
+        RefUpdate$Result/IO_FAILURE              false
+        RefUpdate$Result/LOCK_FAILURE            false
+        RefUpdate$Result/REJECTED                false
+        RefUpdate$Result/REJECTED_CURRENT_BRANCH false
+        :else                                    false))))

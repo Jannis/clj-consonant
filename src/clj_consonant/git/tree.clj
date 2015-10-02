@@ -54,7 +54,6 @@
   ((complement empty?) (filter #{name} (map :name (:entries tree)))))
 
 (defn update [repo tree entry]
-  (println "update" tree entry)
   (let [formatter (tree-formatter)]
     (doseq [cur (:entries tree)]
       (if (= (:entry name) (.getPathString cur))

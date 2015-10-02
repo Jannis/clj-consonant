@@ -81,10 +81,10 @@
 
 (defmethod run-action :begin
   [store actions _ action]
-  (println "run-action" :begin)
-  (if (= (:source action) (str/join (repeat 40 "0")))
+  (println "run-action" :begin (:source action))
+  (if (= (:source action) nil)
       (tree/make-empty (:repo store))
-      (->> (git-commit/load (:repo store) (to-oid (:source action)))
+      (->> (git-commit/load (:repo store) (to-oid (:repo store) (:source action)))
            (git-commit/tree (:repo store)))))
 
 (defmethod run-action :create
@@ -108,10 +108,8 @@
   [store actions tree action]
   (println "run-action" :commit tree)
   (let [begin   (first actions)
-        source  (when-not (= (:source begin) (str/join (repeat 40 "0")))
-                  (to-oid (:repo store) (:source begin)))
-        parent  (when source
-                  (git-commit/load (:repo store) source))
+        source  (when (:source begin) (to-oid (:repo store) (:source begin)))
+        parent  (when source (git-commit/load (:repo store) source))
         parents (if parent [parent] [])
         commit  (git-commit/make (:repo store)
                                  tree
@@ -120,9 +118,9 @@
                                  :committer (ident/from-map (:committer action))
                                  :message (:message action))
         target  (reference/load (:repo store) (:target action))]
-    (println "COMMIT" commit)
-    (println "TARGET" target)
-    nil))
+    (when target
+      (when (reference/update! (:repo store) target commit)
+        (reference/load (:repo store) (:target action))))))
 
 (defn run! [store actions]
   (when store
