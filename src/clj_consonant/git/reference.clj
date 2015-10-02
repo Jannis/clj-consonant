@@ -7,13 +7,15 @@
             [clj-consonant.git.repo :refer [object-type rev-walk]]
             [clj-consonant.git.tag :as tag]))
 
-(defrecord Reference [type url-aliases tag head])
+(defrecord Reference [name type url-aliases tag head])
 
 (defn to-reference [repo jref]
-  (when (and jref (.getObjectId jref))
-    (let [tag?       (re-matches #"^refs/tags/" (.getName jref))
-          annotated? (= Constants/OBJ_TAG (object-type repo (.getObjectId jref)))
-          alias      (to-alias (.getName jref))
+  (when jref
+    (let [name       (.getName jref)
+          alias      (to-alias name)
+          oid        (.getObjectId jref)
+          tag?       (re-matches #"^refs/tags/" (.getName jref))
+          annotated? (when oid (= Constants/OBJ_TAG (object-type repo oid)))
           tag        (when annotated? (tag/load repo (.getObjectId jref)))
           head-oid   (if tag
                        (->> (to-oid repo (:sha1 tag))
@@ -21,8 +23,8 @@
                             (.getObject)
                             (.getId))
                         (.getObjectId (.getLeaf jref)))
-          head       (commit/load repo head-oid)]
-      (->Reference (if tag? "tag" "branch") [alias] tag head))))
+          head       (when head-oid (commit/load repo head-oid))]
+      (->Reference name (if tag? "tag" "branch") [alias] tag head))))
 
 (defn load [repo name]
   (->> (.getRef (.getRepository repo) name)
