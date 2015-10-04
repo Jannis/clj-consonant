@@ -40,7 +40,7 @@
     (.setNewObjectId update (to-oid repo (:sha1 commit)))
     (let [result (.update update)]
       (println result)
-      (condp =
+      (condp = result
         RefUpdate$Result/FAST_FORWARD            true
         RefUpdate$Result/FORCED                  true
         RefUpdate$Result/NEW                     true

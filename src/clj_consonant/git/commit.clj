@@ -1,7 +1,7 @@
 (ns clj-consonant.git.commit
   (:import [org.eclipse.jgit.lib CommitBuilder])
   (:refer-clojure :exclude [load])
-  (:require [clj-consonant.git.coerce :refer [to-oid]]
+  (:require [clj-consonant.git.coerce :refer [to-oid to-sha1]]
             [clj-consonant.git.ident :as ident]
             [clj-consonant.git.repo :refer [object-inserter rev-walk]]
             [clj-consonant.git.tree :as git-tree]))
@@ -22,7 +22,7 @@
         committer (ident/load (.getCommitterIdent jcommit))
         subject   (.getShortMessage jcommit)
         message   (.getFullMessage jcommit)
-        parents   (mapv #(.getId %) (.getParents jcommit))]
+        parents   (mapv #(to-sha1 (.getId %)) (.getParents jcommit))]
     (->Commit sha1 author committer subject message parents)))
 
 (defn load [repo oid]

@@ -1,6 +1,7 @@
 (ns clj-consonant.local-store
   (:require [clj-consonant.git.repo :as repository]
             [clj-consonant.git.coerce :refer [to-refname]]
+            [clj-consonant.git.commit :as commit]
             [clj-consonant.git.reference :as reference]
             [clj-consonant.classes :as classes]
             [clj-consonant.objects :as objects]
@@ -31,9 +32,10 @@
 
   (get-classes [this ref-alias]
     (when (:repo this)
-      (->> (get-ref this ref-alias)
-           :head
-           (classes/load-all (:repo this)))))
+      (classes/load-all (:repo this)
+                        (->> (get-ref this ref-alias)
+                             :head
+                             (commit/tree (:repo this))))))
 
   (get-class [this class-name]
     (get-class this "HEAD" class-name))
@@ -41,16 +43,21 @@
   (get-class [this ref-alias class-name]
     (when (:repo this)
       (classes/load (:repo this)
-                    (:head (get-ref this ref-alias))
+                    (->> (get-ref this ref-alias)
+                         :head
+                         (commit/tree (:repo this)))
                     class-name)))
 
   (get-objects [this class-name]
     (get-objects this "HEAD" class-name))
 
   (get-objects [this ref-alias class-name]
+    (println "local-store/get-objects" ref-alias class-name)
     (when (:repo this)
       (objects/load-all (:repo this)
-                        (:head (get-ref this ref-alias))
+                        (->> (get-ref this ref-alias)
+                             :head
+                             (commit/tree (:repo this)))
                         (get-class this ref-alias class-name))))
 
   (get-object [this class-name uuid]
@@ -59,7 +66,9 @@
   (get-object [this ref-alias class-name uuid]
     (when (:repo this)
       (objects/load (:repo this)
-                    (:head (get-ref this ref-alias))
+                    (->> (get-ref this ref-alias)
+                         :head
+                         (commit/tree (:repo this)))
                     (get-class this ref-alias class-name)
                     uuid)))
 

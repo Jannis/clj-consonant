@@ -7,81 +7,15 @@
             [clj-consonant.git.reference :as reference]
             [clj-consonant.git.tree :as tree]
             [clj-consonant.classes :as classes]
+            [clj-consonant.debug :refer [print-and-return]]
             [clj-consonant.objects :as objects]))
-
-;;;; JGit helpers
-
-; (defn- make-tree
-;   ([store]
-;    (make-tree store []))
-;   ([store objects]
-;    (let [formatter (TreeFormatter.)]
-;      (doseq [object objects]
-;        (.append formatter (:name object) (:type object) (:oid object)))
-;      (let [inserter  (object-inserter store)
-;            oid       (.insert inserter formatter)]
-;        (.flush inserter)
-;        (.lookupTree (rev-walk store) oid)))))
-;
-; (defn- make-identity
-;   ([s] (PersonIdent. "Foo" "bar@bar.org")))
-;
-; (defn- make-commit
-;   [store tree & {:keys [author committer message]}]
-;   (println tree author committer message)
-;   (let [repo (:repo store)
-;         builder (CommitBuilder.)]
-;     (.setTreeId builder (.getId tree))
-;     (.setAuthor builder author)
-;     (.setCommitter builder committer)
-;     (.setMessage builder message)
-;     (let [inserter (git-object-inserter repo)
-;           oid      (.insert inserter builder)]
-;       (.flush inserter)
-;       (.parseCommit (RevWalk. (.getRepository repo)) oid))))
-;
-; (defn- update-ref
-;   [store refname commit]
-;   (let [update (.updateRef (.getRepository (:repo store)) refname)]
-;     (.setNewObjectId update (.getId commit))
-;     (.update update)))
-;
-; ;;;; Transactions
-;
-; (defmulti apply-action (fn [_ _ action] (:action action)))
-;
-; (defmethod apply-action :begin
-;   [store _ action]
-;   (println "apply-action" :begin action)
-;   (if (= (:source action) (str/join (repeat 40 "0")))
-;     (make-tree store)
-;     (->> (to-oid store (:source action))
-;          (.parseCommit (rev-walk store))
-;          (.getTree))))
-;
-; (defmethod apply-action :create
-;   [store tree action]
-;   (println "apply-action" :create action)
-;   (println "tree" tree)
-;   tree)
-;
-; (defmethod apply-action :end
-;   [store tree action]
-;   (println "apply-action" :end action)
-;   (println "tree" tree)
-;   (->> (make-commit store tree
-;                     :author    (make-identity (:author action))
-;                     :committer (make-identity (:committer action))
-;                     :message   (:message action))
-;        (update-ref store (:target action)))
-;   (->> (load-ref store (:target action))
-;        (parse-ref store)))
 
 (defmulti run-action (fn [_ _ _ action] (:action action)))
 
 (defmethod run-action :begin
   [store actions _ action]
-  (println "run-action" :begin (:source action))
+  (println)
+  (println "BEGIN" (:source action))
   (if (= (:source action) nil)
       (tree/make-empty (:repo store))
       (->> (git-commit/load (:repo store) (to-oid (:repo store) (:source action)))
@@ -89,24 +23,51 @@
 
 (defmethod run-action :create
   [store actions tree action]
-  (println "run-action" :create tree)
+  (println)
+  (println "CREATE" tree)
   (let [class-name   (:class action)
+        ; _            (println "> class-name" class-name)
+        uuid         (or (:uuid action) (.toString (java.util.UUID/randomUUID)))
+        ; _            (println "> uuid" uuid)
         class-tree   (or (tree/get-tree (:repo store) tree class-name)
                          (tree/make-empty (:repo store)))
-        _            (println "class-tree" class-tree)
-        object       (objects/make class-name (:properties action))
-        _            (println "object" object)
+        ; _            (println "> class-tree" class-tree)
+        object       (objects/make uuid class-name (:properties action))
+        ; _            (println "> object" object)
         object-blob  (objects/make-blob (:repo store) object)
-        _            (println "object-blob" object-blob)
+        ; _            (println "> object-blob" object-blob)
         object-entry (objects/to-tree-entry object object-blob)]
     (->> object-entry
          (tree/update (:repo store) class-tree)
          (tree/to-tree-entry class-name)
-         (tree/update (:repo store) tree))))
+         (tree/update (:repo store) tree)
+         (print-and-return "> TREE AFTER CREATE"))))
+
+(defmethod run-action :update
+  [store actions tree action]
+  (println)
+  (println "UPDATE" tree)
+  (let [uuid         (:uuid action)
+        ; _            (println "> uuid" uuid)
+        class        (classes/load-for-uuid (:repo store) tree uuid)
+        ; _            (println "> class" class)
+        class-tree   (tree/get-tree (:repo store) tree (:name class))
+        ; _            (println "> class-tree" class-tree)
+        object       (objects/make uuid (:name class) (:properties action))
+        ; _            (println "> object" object)
+        object-blob  (objects/make-blob (:repo store) object)
+        ; _            (println "> object-blob" object-blob)
+        object-entry (objects/to-tree-entry object object-blob)]
+    (->> object-entry
+         (tree/update (:repo store) class-tree)
+         (tree/to-tree-entry (:name class))
+         (tree/update (:repo store) tree)
+         (print-and-return "> TREE AFTER UPDATE"))))
 
 (defmethod run-action :commit
   [store actions tree action]
-  (println "run-action" :commit tree)
+  (println)
+  (println "COMMIT" tree)
   (let [begin   (first actions)
         source  (when (:source begin) (to-oid (:repo store) (:source begin)))
         parent  (when source (git-commit/load (:repo store) source))
@@ -120,7 +81,9 @@
         target  (reference/load (:repo store) (:target action))]
     (when target
       (when (reference/update! (:repo store) target commit)
-        (reference/load (:repo store) (:target action))))))
+        (let [updated-ref (reference/load (:repo store) (:target action))]
+          (println "> updated ref" updated-ref)
+          updated-ref)))))
 
 (defn run! [store actions]
   (when store

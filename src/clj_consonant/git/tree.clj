@@ -1,7 +1,7 @@
 (ns clj-consonant.git.tree
   (:import [org.eclipse.jgit.lib FileMode TreeFormatter])
   (:refer-clojure :exclude [load update])
-  (:require [clj-consonant.git.coerce :refer [to-oid to-sha1]]
+  (:require [clj-consonant.git.coerce :refer [to-file-mode to-oid to-sha1]]
             [clj-consonant.git.repo :refer [object-inserter
                                             rev-walk
                                             tree-walk
@@ -40,31 +40,41 @@
   (let [formatter (tree-formatter)
         inserter  (object-inserter repo)
         oid       (.insert inserter formatter)]
-    (.flush inserter)
-    (load repo oid)))
+    (do
+      (.flush inserter)
+      (load repo oid))))
 
 (defn get-tree [repo tree subtree-name]
   (let [jtree (to-jtree repo tree)
         walk  (tree-walk-for-entry repo jtree subtree-name)]
     (when walk
-      (->> (.getObectId walk 0)
-           (load repo)))))
+      (load repo (.getObjectId walk 0)))))
 
 (defn contains-entry? [tree name]
   ((complement empty?) (filter #{name} (map :name (:entries tree)))))
 
 (defn update [repo tree entry]
+  (println "> update tree")
+  (println ">   " tree)
+  (println ">   " entry)
   (let [formatter (tree-formatter)]
     (doseq [cur (:entries tree)]
-      (if (= (:entry name) (.getPathString cur))
-        (.append formatter (:name entry) (:type entry) (to-oid repo (:sha1 entry)))
-        (.append formatter (:name cur) (:type cur) (to-oid repo (:sha1 cur)))))
+      (println cur)
+      (if (= (:name entry) (:name cur))
+        (.append formatter (:name entry)
+                           (to-file-mode (:type entry))
+                           (to-oid repo (:sha1 entry)))
+        (.append formatter (:name cur)
+                           (to-file-mode (:type cur))
+                           (to-oid repo (:sha1 cur)))))
     (when-not (contains-entry? tree (:name entry))
-      (.append formatter (:name entry) (:type entry) (to-oid repo (:sha1 entry))))
+      (.append formatter (:name entry)
+                         (to-file-mode (:type entry))
+                         (to-oid repo (:sha1 entry))))
     (let [inserter (object-inserter repo)
           oid      (.insert inserter formatter)]
       (.flush inserter)
       (load repo oid))))
 
 (defn to-tree-entry [name tree]
-  (->TreeEntry name (:sha1 tree) FileMode/TREE))
+  (->TreeEntry name (:sha1 tree) :tree))

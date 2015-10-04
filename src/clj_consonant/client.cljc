@@ -12,13 +12,19 @@
 
 (defn get-refs [client handler error-handler]
   (GET (make-url client "refs")
-       {:handler handler
-        :error-handler error-handler}))
+       {:handler handler :error-handler error-handler}))
 
 (defn get-ref [client refname handler error-handler]
   (GET (make-url client "refs" refname)
-       {:handler handler
-        :error-handler error-handler}))
+       {:handler handler :error-handler error-handler}))
+
+(defn get-objects
+  ([client refname handler error-handler]
+   (GET (make-url client "refs" refname "objects")
+        {:handler handler :error-handler error-handler}))
+  ([client refname class handler error-handler]
+   (GET (make-url client "refs" refname "class" class "objects")
+        {:handler handler :error-handler error-handler})))
 
 (defn transact! [client handler error-handler actions]
   (POST (make-url client "transactions")

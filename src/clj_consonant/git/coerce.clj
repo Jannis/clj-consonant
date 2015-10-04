@@ -1,4 +1,5 @@
 (ns clj-consonant.git.coerce
+  (:import [org.eclipse.jgit.lib FileMode])
   (:require [clojure.string :as str]))
 
 (defn to-sha1 [oid]
@@ -12,3 +13,9 @@
 
 (defn to-alias [refname]
   (str/replace refname #"/" ":"))
+
+(defn to-file-mode [mode]
+  (case mode
+    :tree FileMode/TREE
+    :file FileMode/REGULAR_FILE
+          nil))

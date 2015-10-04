@@ -5,6 +5,7 @@
             [ring.middleware.format-response :refer [wrap-transit-json-response]]
             [ring.middleware.logger :refer [wrap-with-logger]]
             [ring.util.response :refer [response header]]
+            [clj-consonant.debug :refer [print-and-return]]
             [clj-consonant.local-store :refer [local-store]]
             [clj-consonant.store :as store]))
 
@@ -43,9 +44,13 @@
 
 (defn handle-objects
   ([refname]
+   (println "handle-objects" refname)
    (->> (store/get-classes @data-store refname)
+        (print-and-return "> classes")
         (keys)
+        (print-and-return "> class names")
         (map #(vector % (store/get-objects @data-store refname %)))
+        (print-and-return "> with objects")
         (into {})
         (response)))
   ([refname class]

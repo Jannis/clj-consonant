@@ -1,4 +1,5 @@
-(ns clj-consonant.actions)
+(ns clj-consonant.actions
+  (:refer-clojure :exclude [update]))
 
 (defn begin
   [& {:keys [source]}]
@@ -14,8 +15,14 @@
    :message        message})
 
 (defn create
-  [& {:keys [id class properties]}]
+  [& {:keys [uuid class properties]}]
   {:action     :create
-   :id         id
+   :uuid       uuid
    :class      class
+   :properties properties})
+
+(defn update
+  [& {:keys [uuid properties]}]
+  {:action     :update
+   :uuid       uuid
    :properties properties})
