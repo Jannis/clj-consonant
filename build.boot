@@ -4,7 +4,7 @@
   :source-paths #{"test"}
   :resource-paths #{"src"}
   :dependencies '[; Boot
-                  [adzerk/boot-cljs "1.7.48-5-SNAPSHOT"]
+                  [adzerk/boot-cljs "1.7.170-1"]
                   [adzerk/boot-test "1.0.4"]
                   [boot-environ "1.0.1"]
                   [pandeiro/boot-http "0.6.3"]
@@ -21,7 +21,7 @@
                   [ring.middleware.logger "0.5.0"]
 
                   ; Client
-                  [org.clojure/clojurescript "1.7.48"]
+                  [org.clojure/clojurescript "1.7.170"]
                   [cljs-ajax "0.3.14"]
 
                   ; Utilities
