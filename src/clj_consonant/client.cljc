@@ -1,10 +1,16 @@
 (ns clj-consonant.client
-  (:require [clojure.string :as str]
+  (:require [com.stuartsierra.component :as component]
+            [clojure.string :as str]
             [ajax.core :refer [GET POST]]))
 
-(defrecord ServiceClient [url])
+(defrecord ServiceClient [url]
+  component/Lifecycle
+  (start [component]
+    component)
+  (stop [component]
+    component))
 
-(defn make-client [url]
+(defn new-client [url]
   (ServiceClient. url))
 
 (defn make-url [client & segments]

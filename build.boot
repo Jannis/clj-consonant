@@ -13,6 +13,7 @@
                   [clj-jgit "0.8.8"]
                   [clj-time "0.11.0"]
                   [com.cognitect/transit-clj "0.8.281"]
+                  [com.stuartsierra/component "0.3.0"]
                   [compojure "1.4.0"]
                   [danlentz/clj-uuid "0.1.6"]
                   [environ "1.0.1"]
