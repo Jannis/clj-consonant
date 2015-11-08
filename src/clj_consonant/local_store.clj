@@ -1,5 +1,6 @@
 (ns clj-consonant.local-store
-  (:require [clj-consonant.git.repo :as repository]
+  (:require [com.stuartsierra.component :as component]
+            [clj-consonant.git.repo :as repository]
             [clj-consonant.git.coerce :refer [to-refname]]
             [clj-consonant.git.commit :as commit]
             [clj-consonant.git.reference :as reference]
@@ -12,7 +13,6 @@
 
 (defrecord LocalStore [location cache repo]
   Store
-
   (connect [this]
     (assoc this :repo (repository/load (:location this))))
 
@@ -90,12 +90,24 @@
 
   (transact! [this actions]
     (when (:repo this)
-      (transaction/run! this actions))))
+      (transaction/run! this actions)))
+
+  component/Lifecycle
+  (start [component]
+    (connect component))
+  (stop [component]
+    (disconnect component)))
+
+(defn new-local-store
+  ([location]
+   (LocalStore. location nil nil))
+  ([location cache]
+   (LocalStore. location cache nil)))
 
 (defn local-store
   ([location]
-    (-> (LocalStore. location nil nil)
+    (-> (new-local-store location)
         (connect)))
   ([location cache]
-    (-> (LocalStore. location cache nil)
+    (-> (new-local-store location cache)
         (connect))))
