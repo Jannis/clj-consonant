@@ -8,9 +8,9 @@
 (defrecord Blob [sha1 data])
 
 (defn load [repo oid]
-  (->> (object-loader repo oid)
-       (.getBytes)
-       (->Blob (to-sha1 oid))))
+  (some->> (object-loader repo oid)
+           (.getBytes)
+           (->Blob (to-sha1 oid))))
 
 (defn write [repo data]
   (let [inserter (object-inserter repo)

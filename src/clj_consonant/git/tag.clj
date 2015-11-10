@@ -13,5 +13,5 @@
     (->Tag sha1 tagger subject message)))
 
 (defn load [repo oid]
-  (->> (.parseTag (rev-walk repo) oid)
-       (to-tag repo)))
+  (some->> (.parseTag (rev-walk repo) oid)
+           (to-tag repo)))

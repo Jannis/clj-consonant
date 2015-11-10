@@ -26,19 +26,19 @@
     (->Commit sha1 author committer subject message parents)))
 
 (defn load [repo oid]
-  (->> (.parseCommit (rev-walk repo) oid)
-       (to-commit repo)))
+  (some->> (.parseCommit (rev-walk repo) oid)
+           (to-commit repo)))
 
 (defn to-jcommit [repo commit]
-  (->> (:sha1 commit)
-       (to-oid repo)
-       (.parseCommit (rev-walk repo))))
+  (some->> (:sha1 commit)
+           (to-oid repo)
+           (.parseCommit (rev-walk repo))))
 
 (defn tree [repo commit]
-  (->> (to-jcommit repo commit)
-       (.getTree)
-       (.getId)
-       (git-tree/load repo)))
+  (some->> (to-jcommit repo commit)
+           (.getTree)
+           (.getId)
+           (git-tree/load repo)))
 
 (defn make [repo tree parents & {:keys [author committer message]}]
   (let [builder (commit-builder)]

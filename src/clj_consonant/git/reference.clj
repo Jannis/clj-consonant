@@ -27,8 +27,8 @@
       (->Reference name (if tag? "tag" "branch") [alias] tag head))))
 
 (defn load [repo name]
-  (->> (.getRef (.getRepository repo) name)
-       (to-reference repo)))
+  (some->> (.getRef (.getRepository repo) name)
+           (to-reference repo)))
 
 (defn load-all [repo]
   (into {}

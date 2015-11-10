@@ -28,13 +28,13 @@
     (->Tree sha1 entries)))
 
 (defn to-jtree [repo tree]
-  (->> (:sha1 tree)
-       (to-oid repo)
-       (.parseTree (rev-walk repo))))
+  (some->> (:sha1 tree)
+           (to-oid repo)
+           (.parseTree (rev-walk repo))))
 
 (defn load [repo oid]
-  (->> (.parseTree (rev-walk repo) oid)
-       (to-tree repo)))
+  (some->> (.parseTree (rev-walk repo) oid)
+           (to-tree repo)))
 
 (defn make-empty [repo]
   (let [formatter (tree-formatter)

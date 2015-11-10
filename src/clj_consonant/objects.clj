@@ -20,22 +20,21 @@
     (->ConsonantObject uuid (:name class) props)))
 
 (defn load-all [repo tree class]
-  (println "objects/load-all" repo tree class)
-  (->> (classes/tree repo tree class)
-       (print-and-return "> class tree")
-       :entries
-       (print-and-return "> entries")
-       (filter #(= :file (:type %)))
-       (print-and-return "> files")
-       (map (partial load-from-entry repo class))))
+  (some->> (classes/tree repo tree class)
+           (print-and-return "> class tree")
+           :entries
+           (print-and-return "> entries")
+           (filter #(= :file (:type %)))
+           (print-and-return "> files")
+           (map (partial load-from-entry repo class))))
 
 (defn load [repo tree class uuid]
-  (->> (classes/tree repo tree class)
-       :entries
-       (filter #(= :file (:type %)))
-       (filter #(= uuid (:name %)))
-       (first)
-       (load-from-entry repo class)))
+  (some->> (classes/tree repo tree class)
+           :entries
+           (filter #(= :file (:type %)))
+           (filter #(= uuid (:name %)))
+           (first)
+           (load-from-entry repo class)))
 
 (defn make [uuid class properties]
   (->ConsonantObject uuid class properties))
