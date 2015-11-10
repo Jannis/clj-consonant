@@ -39,7 +39,6 @@
   (let [update (.updateRef (.getRepository repo) (:name ref))]
     (.setNewObjectId update (to-oid repo (:sha1 commit)))
     (let [result (.update update)]
-      (println result)
       (condp = result
         RefUpdate$Result/FAST_FORWARD            true
         RefUpdate$Result/FORCED                  true

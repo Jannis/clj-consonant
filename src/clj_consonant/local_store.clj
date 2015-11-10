@@ -52,7 +52,6 @@
     (get-objects this "HEAD" class-name))
 
   (get-objects [this ref-alias class-name]
-    (println "local-store/get-objects" ref-alias class-name)
     (when (:repo this)
       (objects/load-all (:repo this)
                         (->> (get-ref this ref-alias)

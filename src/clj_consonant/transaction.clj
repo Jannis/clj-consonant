@@ -14,8 +14,8 @@
 
 (defmethod run-action :begin
   [store actions _ action]
-  (println)
-  (println "BEGIN" (:source action))
+  ; (println)
+  ; (println "BEGIN" (:source action))
   (if (= (:source action) nil)
       (tree/make-empty (:repo store))
       (->> (git-commit/load (:repo store) (to-oid (:repo store) (:source action)))
@@ -23,8 +23,8 @@
 
 (defmethod run-action :create
   [store actions tree action]
-  (println)
-  (println "CREATE" tree)
+  ; (println)
+  ; (println "CREATE" tree)
   (let [class-name   (:class action)
         ; _            (println "> class-name" class-name)
         uuid         (or (:uuid action) (.toString (java.util.UUID/randomUUID)))
@@ -40,13 +40,13 @@
     (->> object-entry
          (tree/update (:repo store) class-tree)
          (tree/to-tree-entry class-name)
-         (tree/update (:repo store) tree)
-         (print-and-return "> TREE AFTER CREATE"))))
+         (tree/update (:repo store) tree))))
+        ;  (print-and-return "> TREE AFTER CREATE"))))
 
 (defmethod run-action :update
   [store actions tree action]
-  (println)
-  (println "UPDATE" tree)
+  ; (println)
+  ; (println "UPDATE" tree)
   (let [uuid         (:uuid action)
         ; _            (println "> uuid" uuid)
         class        (classes/load-for-uuid (:repo store) tree uuid)
@@ -61,13 +61,13 @@
     (->> object-entry
          (tree/update (:repo store) class-tree)
          (tree/to-tree-entry (:name class))
-         (tree/update (:repo store) tree)
-         (print-and-return "> TREE AFTER UPDATE"))))
+         (tree/update (:repo store) tree))))
+        ;  (print-and-return "> TREE AFTER UPDATE"))))
 
 (defmethod run-action :commit
   [store actions tree action]
-  (println)
-  (println "COMMIT" tree)
+  ; (println)
+  ; (println "COMMIT" tree)
   (let [begin   (first actions)
         source  (when (:source begin) (to-oid (:repo store) (:source begin)))
         parent  (when source (git-commit/load (:repo store) source))
@@ -82,7 +82,7 @@
     (when target
       (when (reference/update! (:repo store) target commit)
         (let [updated-ref (reference/load (:repo store) (:target action))]
-          (println "> updated ref" updated-ref)
+          ; (println "> updated ref" updated-ref)
           updated-ref)))))
 
 (defn run! [store actions]

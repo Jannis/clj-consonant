@@ -54,12 +54,8 @@
   ((complement empty?) (filter #{name} (map :name (:entries tree)))))
 
 (defn update [repo tree entry]
-  (println "> update tree")
-  (println ">   " tree)
-  (println ">   " entry)
   (let [formatter (tree-formatter)]
     (doseq [cur (:entries tree)]
-      (println cur)
       (if (= (:name entry) (:name cur))
         (.append formatter (:name entry)
                            (to-file-mode (:type entry))

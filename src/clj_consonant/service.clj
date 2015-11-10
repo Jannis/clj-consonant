@@ -44,7 +44,6 @@
 
 (defn handle-objects
   ([refname]
-   (println "handle-objects" refname)
    (->> (store/get-classes @data-store refname)
         (print-and-return "> classes")
         (keys)
