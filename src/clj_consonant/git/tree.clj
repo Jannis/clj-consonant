@@ -1,6 +1,6 @@
 (ns clj-consonant.git.tree
   (:import [org.eclipse.jgit.lib FileMode TreeFormatter])
-  (:refer-clojure :exclude [load remove update])
+  (:refer-clojure :exclude [load])
   (:require [clj-consonant.git.coerce :refer [to-file-mode to-oid to-sha1]]
             [clj-consonant.git.repo :refer [object-inserter
                                             rev-walk
@@ -64,7 +64,7 @@
       (.flush inserter)
       oid)))
 
-(defn update [repo tree entry]
+(defn update-entry [repo tree entry]
   (->> (update tree :entries (fn [entries]
                                (conj (remove #(= (:name %) (:name entry))
                                              entries)
@@ -72,7 +72,7 @@
     (write repo)
     (load repo)))
 
-(defn remove [repo tree entry]
+(defn remove-entry [repo tree entry]
   (->> (update tree :entries remove entry)
     (write repo)
     (load repo)))

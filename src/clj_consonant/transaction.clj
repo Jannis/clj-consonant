@@ -38,9 +38,9 @@
         ; _            (println "> object-blob" object-blob)
         object-entry (objects/to-tree-entry object object-blob)]
     (->> object-entry
-         (tree/update (:repo store) class-tree)
+         (tree/update-entry (:repo store) class-tree)
          (tree/to-tree-entry class-name)
-         (tree/update (:repo store) tree))))
+         (tree/update-entry (:repo store) tree))))
         ;  (print-and-return "> TREE AFTER CREATE"))))
 
 (defmethod run-action :delete
@@ -51,9 +51,9 @@
         object-entry (first (filter #(= (:name %) uuid) (:entries class-tree)))]
     (if-not (nil? object-entry)
       (->> object-entry
-        (tree/remove (:repo store) class-tree)
+        (tree/remove-entry (:repo store) class-tree)
         (tree/to-tree-entry (:name class))
-        (tree/update (:repo store) tree)))))
+        (tree/update-entry (:repo store) tree)))))
 
 (defmethod run-action :update
   [store actions tree action]
@@ -71,9 +71,9 @@
         ; _            (println "> object-blob" object-blob)
         object-entry (objects/to-tree-entry object object-blob)]
     (->> object-entry
-         (tree/update (:repo store) class-tree)
+         (tree/update-entry (:repo store) class-tree)
          (tree/to-tree-entry (:name class))
-         (tree/update (:repo store) tree))))
+         (tree/update-entry (:repo store) tree))))
         ;  (print-and-return "> TREE AFTER UPDATE"))))
 
 (defmethod run-action :commit
