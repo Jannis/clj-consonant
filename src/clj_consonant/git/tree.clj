@@ -73,7 +73,9 @@
     (load repo)))
 
 (defn remove-entry [repo tree entry]
-  (->> (update tree :entries remove entry)
+  (->> (update tree :entries (fn [entries]
+                               (remove #(= (:name %) (:name entry))
+                                       entries)))
     (write repo)
     (load repo)))
 

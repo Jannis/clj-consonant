@@ -53,7 +53,8 @@
       (->> object-entry
         (tree/remove-entry (:repo store) class-tree)
         (tree/to-tree-entry (:name class))
-        (tree/update-entry (:repo store) tree)))))
+        (tree/update-entry (:repo store) tree))
+      tree)))
 
 (defmethod run-action :update
   [store actions tree action]
