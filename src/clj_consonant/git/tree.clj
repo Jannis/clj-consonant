@@ -53,24 +53,29 @@
 (defn contains-entry? [tree name]
   ((complement empty?) (filter #{name} (map :name (:entries tree)))))
 
-(defn update [repo tree entry]
+(defn write [repo tree]
   (let [formatter (tree-formatter)]
-    (doseq [cur (:entries tree)]
-      (if (= (:name entry) (:name cur))
-        (.append formatter (:name entry)
-                           (to-file-mode (:type entry))
-                           (to-oid repo (:sha1 entry)))
-        (.append formatter (:name cur)
-                           (to-file-mode (:type cur))
-                           (to-oid repo (:sha1 cur)))))
-    (when-not (contains-entry? tree (:name entry))
+    (doseq [entry (:entries tree)]
       (.append formatter (:name entry)
-                         (to-file-mode (:type entry))
-                         (to-oid repo (:sha1 entry))))
+               (to-file-mode (:type entry))
+               (to-oid repo (:sha1 entry))))
     (let [inserter (object-inserter repo)
           oid      (.insert inserter formatter)]
       (.flush inserter)
-      (load repo oid))))
+      oid)))
+
+(defn update [repo tree entry]
+  (->> (update tree :entries (fn [entries]
+                               (conj (remove #(= (:name %) (:name entry))
+                                             entries)
+                                     entry)))
+    (write repo)
+    (load repo)))
+
+(defn remove [repo tree entry]
+  (->> (update tree :entries remove entry)
+    (write repo)
+    (load repo)))
 
 (defn to-tree-entry [name tree]
   (->TreeEntry name (:sha1 tree) :tree))

@@ -8,11 +8,11 @@
 
 (defn commit
   [& {:keys [target author committer message]}]
-  {:action         :commit
-   :target         target
-   :author         author
-   :committer      committer
-   :message        message})
+  {:action    :commit
+   :target    target
+   :author    author
+   :committer committer
+   :message   message})
 
 (defn create
   [& {:keys [uuid class properties]}]
@@ -20,6 +20,11 @@
    :uuid       uuid
    :class      class
    :properties properties})
+
+(defn delete
+  [& {:keys [uuid]}]
+  {:action :delete
+   :uuid   uuid})
 
 (defn update
   [& {:keys [uuid properties]}]

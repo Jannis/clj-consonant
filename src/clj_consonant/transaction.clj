@@ -43,6 +43,18 @@
          (tree/update (:repo store) tree))))
         ;  (print-and-return "> TREE AFTER CREATE"))))
 
+(defmethod run-action :delete
+  [store actions tree action]
+  (let [uuid         (:uuid action)
+        class        (classes/load-for-uuid (:repo store) tree uuid)
+        class-tree   (tree/get-tree (:repo store) tree (:name class))
+        object-entry (first (filter #(= (:name %) uuid) (:entries class-tree)))]
+    (if-not (nil? object-entry)
+      (->> object-entry
+        (tree/remove (:repo store) class-tree)
+        (tree/to-tree-entry (:name class))
+        (tree/update (:repo store) tree)))))
+
 (defmethod run-action :update
   [store actions tree action]
   ; (println)
