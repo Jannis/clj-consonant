@@ -1,6 +1,6 @@
 (ns clj-consonant.git.tree
   (:import [org.eclipse.jgit.lib FileMode TreeFormatter])
-  (:refer-clojure :exclude [load update])
+  (:refer-clojure :exclude [load remove update])
   (:require [clj-consonant.git.coerce :refer [to-file-mode to-oid to-sha1]]
             [clj-consonant.git.repo :refer [object-inserter
                                             rev-walk
