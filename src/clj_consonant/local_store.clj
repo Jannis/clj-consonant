@@ -102,7 +102,7 @@
     (disconnect component)))
 
 (defn new-local-store [location]
-  (LocalStore. location nil nil))
+  (LocalStore. location nil))
 
 (defn local-store [location]
   (-> (new-local-store location)
