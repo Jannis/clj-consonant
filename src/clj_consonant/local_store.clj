@@ -12,7 +12,7 @@
 
 ;;;; Local store implementation
 
-(defrecord LocalStore [location cache repo]
+(defrecord LocalStore [location repo]
   Store
   (connect [this]
     (assoc this :repo (repository/load (:location this))))
@@ -101,16 +101,9 @@
   (stop [component]
     (disconnect component)))
 
-(defn new-local-store
-  ([location]
-   (LocalStore. location nil nil))
-  ([location cache]
-   (LocalStore. location cache nil)))
+(defn new-local-store [location]
+  (LocalStore. location nil nil))
 
-(defn local-store
-  ([location]
-   (-> (new-local-store location)
-       (connect)))
-  ([location cache]
-   (-> (new-local-store location cache)
-       (connect))))
+(defn local-store [location]
+  (-> (new-local-store location)
+      (connect)))
