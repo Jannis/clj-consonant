@@ -8,11 +8,11 @@
 (defn to-oid [repo sha1]
   (.resolve (.getRepository repo) sha1))
 
-(defn to-refname [alias]
-  (str/replace alias #":" "/"))
+(defn to-git-ref-name [name]
+  (str/replace name #":" "/"))
 
-(defn to-alias [refname]
-  (str/replace refname #"/" ":"))
+(defn to-ref-name [name]
+  (str/replace name #"/" ":"))
 
 (defn to-file-mode [mode]
   (case mode

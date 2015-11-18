@@ -2,19 +2,19 @@
   (:import [org.eclipse.jgit.lib Constants RefUpdate RefUpdate$Result])
   (:refer-clojure :exclude [load])
   (:require [clojure.string :as str]
-            [clj-consonant.git.coerce :refer [to-alias to-oid]]
+            [clj-consonant.git.coerce :refer [to-ref-name to-oid]]
             [clj-consonant.git.commit :as commit]
             [clj-consonant.git.repo :refer [object-type rev-walk]]
             [clj-consonant.git.tag :as tag]))
 
-(defrecord Reference [name type url-aliases tag head])
+(defrecord Reference [name type tag head])
 
 (defn to-reference [repo jref]
   (when jref
-    (let [name       (.getName jref)
-          alias      (to-alias name)
+    (let [git-name   (.getName jref)
+          name       (to-ref-name git-name)
           oid        (.getObjectId jref)
-          tag?       (re-matches #"^refs/tags/" (.getName jref))
+          tag?       (re-matches #"^refs/tags/" git-name)
           annotated? (when oid (= Constants/OBJ_TAG (object-type repo oid)))
           tag        (when annotated? (tag/load repo (.getObjectId jref)))
           head-oid   (if tag
@@ -22,9 +22,9 @@
                             (.parseTag (rev-walk repo))
                             (.getObject)
                             (.getId))
-                        (.getObjectId (.getLeaf jref)))
+                       (.getObjectId (.getLeaf jref)))
           head       (when head-oid (commit/load repo head-oid))]
-      (->Reference name (if tag? "tag" "branch") [alias] tag head))))
+      (->Reference name (if tag? "tag" "branch") tag head))))
 
 (defn load [repo name]
   (some->> (.getRef (.getRepository repo) name)
