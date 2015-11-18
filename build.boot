@@ -38,15 +38,6 @@
          '[environ.core :refer [env]]
          '[pandeiro.boot-http :refer [serve]])
 
-(deftask create-test-store
-  "Create and populate test store"
-  []
-  (require 'util.create-test-store)
-  (comp
-    (with-pre-wrap fileset
-      ((resolve 'util.create-test-store/run) (:test-dir env))
-      fileset)))
-
 (deftask service
   "Launch a Consonant service"
   [s store PATH str "Consonant store to serve"]
@@ -65,7 +56,6 @@
   "Deploy to Maven"
   []
   (comp
-    (cljs)
     (pom)
     (jar)
     (install)))
