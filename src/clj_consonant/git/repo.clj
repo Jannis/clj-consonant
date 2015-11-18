@@ -1,13 +1,21 @@
 (ns clj-consonant.git.repo
-  (:import [org.eclipse.jgit.revwalk RevWalk]
+  (:import [org.eclipse.jgit.api InitCommand]
+           [org.eclipse.jgit.revwalk RevWalk]
            [org.eclipse.jgit.treewalk TreeWalk])
   (:refer-clojure :exclude [load])
-  (:require [clj-jgit.porcelain :refer [load-repo]]))
+  (:require [clojure.java.io :as io]
+            [clj-jgit.porcelain :refer [load-repo]]))
 
 ;;;; Loading repositories
 
 (defn load [location]
   (load-repo location))
+
+(defn init [location]
+  (-> (InitCommand.)
+      (.setDirectory (io/as-file location))
+      (.call))
+  (load location))
 
 ;;;; Utilities for walking revisions and trees
 

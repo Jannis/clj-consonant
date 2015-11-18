@@ -161,8 +161,8 @@
 (onelog.core/set-debug!)
 
 (def service
-  (do
-    (load-store (System/getProperty "consonant-service-store"))
+  (when-let [store-dir (System/getProperty "consonant-service-store")]
+    (load-store store-dir)
     (-> service-routes
         ; (wrap-with-logger
         ;   :info  #(println %)

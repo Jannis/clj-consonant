@@ -5,9 +5,13 @@
   :resource-paths #{"src"}
   :dependencies '[; Boot
                   [adzerk/boot-cljs "1.7.170-1"]
-                  [adzerk/boot-test "1.0.4"]
+                  [adzerk/boot-test "1.0.5" :scope "test"]
                   [boot-environ "1.0.1"]
                   [pandeiro/boot-http "0.6.3"]
+
+                  ; Testing
+                  [org.clojure/test.check "0.9.0" :scope "test"]
+                  [me.raynes/fs "1.4.6" :scope "test"]
 
                   ; General
                   [clj-jgit "0.8.8"]
@@ -23,7 +27,7 @@
 
                   ; Client
                   [org.clojure/clojurescript "1.7.170"]
-                  [cljs-ajax "0.3.14"]
+                  [cljs-ajax "0.5.1"]
 
                   ; Utilities
                   [me.raynes/fs "1.4.6"]])
