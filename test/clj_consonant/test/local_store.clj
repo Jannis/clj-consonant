@@ -39,10 +39,11 @@
         (is (not (nil? (:repo store)))))
       (finally (setup/delete-git-repo path)))))
 
-(defspec fresh-store-has-no-refs 10
+(defspec fresh-store-has-no-refs-classes-or-objects 10
   (prop/for-all [store setup/gen-store]
     (try
-      (is (empty? (s/get-refs store)))
+      (and (is (empty? (s/get-refs store)))
+           (is (empty? (s/get-classes store))))
       (finally (setup/delete-store store)))))
 
 (defspec fresh-store-has-an-empty-head-ref 10
@@ -55,5 +56,6 @@
              (is (nil? (:tag ref)))
              (is (nil? (:head ref)))
              (is (= #{:name :type :tag :head}
-                    (set (keys ref))))))
+                    (set (keys ref))))
+             (is (empty? (s/get-classes store "HEAD")))))
       (finally (setup/delete-store store)))))
