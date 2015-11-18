@@ -24,5 +24,5 @@
   (get-property [this class-name uuid name] [this ref-alias class-name uuid name]
     "Return the property with the given name of the object with the given UUID
      inside the given class and ref (or HEAD if none is provided)")
-  (transact! [this actions]
-    "Applies a series of actions as a transaction"))
+  (transact! [this transaction]
+    "Applies a transaction"))

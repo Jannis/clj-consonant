@@ -6,11 +6,12 @@
             [clj-consonant.git.ident :as ident]
             [clj-consonant.git.reference :as reference]
             [clj-consonant.git.tree :as tree]
+            [clj-consonant.actions :refer [IAction action-type]]
             [clj-consonant.classes :as classes]
             [clj-consonant.debug :refer [print-and-return]]
             [clj-consonant.objects :as objects]))
 
-(defmulti run-action (fn [_ _ _ action] (:action action)))
+(defmulti run-action (fn [_ _ _ action] (action-type action)))
 
 (defmethod run-action :begin
   [store actions _ action]

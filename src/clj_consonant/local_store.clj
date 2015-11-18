@@ -4,6 +4,7 @@
             [clj-consonant.git.coerce :refer [to-refname]]
             [clj-consonant.git.commit :as commit]
             [clj-consonant.git.reference :as reference]
+            [clj-consonant.actions :refer [ITransaction actions]]
             [clj-consonant.classes :as classes]
             [clj-consonant.objects :as objects]
             [clj-consonant.store :refer :all]
@@ -87,9 +88,12 @@
         (or (get-in object [:properties name])
             (get-in object [:properties (keyword name)])))))
 
-  (transact! [this actions]
+  (transact! [this ta]
+    {:pre [(satisfies? ITransaction ta)]}
+    (println "ta" ta)
+    (println "actions" (actions ta))
     (when (:repo this)
-      (transaction/run! this actions)))
+      (transaction/run! this (actions ta))))
 
   component/Lifecycle
   (start [component]
@@ -105,8 +109,8 @@
 
 (defn local-store
   ([location]
-    (-> (new-local-store location)
-        (connect)))
+   (-> (new-local-store location)
+       (connect)))
   ([location cache]
-    (-> (new-local-store location cache)
-        (connect))))
+   (-> (new-local-store location cache)
+       (connect))))

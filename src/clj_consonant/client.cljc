@@ -1,7 +1,8 @@
 (ns clj-consonant.client
   (:require [com.stuartsierra.component :as component]
             [clojure.string :as str]
-            [ajax.core :refer [GET POST]]))
+            [ajax.core :refer [GET POST]]
+            [clj-consonant.actions :refer [ITransaction actions]]))
 
 (defrecord ServiceClient [url]
   component/Lifecycle
@@ -32,8 +33,9 @@
    (GET (make-url client "refs" refname "classes" class "objects")
         {:handler handler :error-handler error-handler})))
 
-(defn transact! [client handler error-handler actions]
+(defn transact! [client handler error-handler ta]
+  {:pre [(satisfies? ITransaction ta)]}
   (POST (make-url client "transactions")
-        {:params actions
+        {:params (actions ta)
          :handler handler
          :eror-handler error-handler}))
