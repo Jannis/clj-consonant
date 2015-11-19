@@ -32,8 +32,10 @@
 
 (defn load-all [repo]
   (into {}
-    (for [[name ref] (.getAllRefs (.getRepository repo))]
-      [name (to-reference repo ref)])))
+        (map (fn [[_ ref]]
+               (let [reference (to-reference repo ref)]
+                 [(:name reference) reference])))
+        (.getAllRefs (.getRepository repo))))
 
 (defn update! [repo ref commit]
   (let [update (.updateRef (.getRepository repo) (:name ref))]

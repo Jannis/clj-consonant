@@ -37,16 +37,25 @@
     (:actions this)))
 
 (defn begin [options]
+  {:pre [(map? options)]}
   (->Transaction [(map->BeginAction options)]))
 
 (defn commit [ta options]
+  {:pre [(map? options)
+         (:target options)
+         (:author options)
+         (:committer options)
+         (:message options)]}
   (clojure.core/update ta :actions conj (map->CommitAction options)))
 
 (defn create [ta options]
+  {:pre [(map? options)]}
   (clojure.core/update ta :actions conj (map->CreateAction options)))
 
 (defn delete [ta options]
+  {:pre [(map? options)]}
   (clojure.core/update ta :actions conj (map->DeleteAction options)))
 
 (defn update [ta options]
+  {:pre [(map? options)]}
   (clojure.core/update ta :actions conj (map->UpdateAction options)))
