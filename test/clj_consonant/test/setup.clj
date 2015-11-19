@@ -10,7 +10,7 @@
 ;;;; Create temporary directories
 
 (def gen-temp-dir
-  (gen/fmap fs/temp-dir gen/string-alphanumeric))
+  (gen/fmap (fn [some-int] (fs/temp-dir "clj-consonant")) gen/int))
 
 (defspec temp-dir-generator-works 10
   (prop/for-all [dir gen-temp-dir]
