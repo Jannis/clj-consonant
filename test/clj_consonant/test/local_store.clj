@@ -129,6 +129,5 @@
             objects (reduce union #{}
                             (map #(s/get-objects store "HEAD" %)
                                  classes))]
-        (println (count transactions))
         (and (is (= input-classes classes))
              (is (= (count transactions) (count objects))))))))
