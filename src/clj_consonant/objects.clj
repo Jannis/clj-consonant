@@ -7,7 +7,6 @@
             [clj-consonant.git.commit :as commit]
             [clj-consonant.git.tree :as git-tree]
             [clj-consonant.classes :as classes]
-            [clj-consonant.debug :refer [print-and-return]]
             [clj-consonant.transit :refer [transit-read transit-write]]))
 
 (defrecord ConsonantObject [uuid class properties])
@@ -21,11 +20,8 @@
 
 (defn load-all [repo tree class]
   (some->> (classes/tree repo tree class)
-           (print-and-return "> class tree")
            :entries
-           (print-and-return "> entries")
            (filter #(= :file (:type %)))
-           (print-and-return "> files")
            (map (partial load-from-entry repo class))))
 
 (defn load [repo tree class uuid]

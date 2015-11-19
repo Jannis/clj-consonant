@@ -33,8 +33,6 @@
 (defspec local-store-already-connected 5
   (prop/for-all [path setup/gen-git-repo]
     (with-store (ls/local-store path)
-      (println "STORE" store)
-      (println "REPO" (:repo store))
       (is (not (nil? (:repo store)))))))
 
 (defspec fresh-store-has-no-refs-classes-or-objects 5

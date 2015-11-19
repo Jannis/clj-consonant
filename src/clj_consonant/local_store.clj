@@ -90,8 +90,6 @@
 
   (transact! [this ta]
     {:pre [(satisfies? ITransaction ta)]}
-    (println "ta" ta)
-    (println "actions" (actions ta))
     (when (:repo this)
       (transaction/run! this (actions ta))))
 

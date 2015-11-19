@@ -1,7 +1,6 @@
 (ns clj-consonant.classes
   (:refer-clojure :exclude [load])
-  (:require [clj-consonant.debug :refer [print-and-return]]
-            [clj-consonant.git.coerce :refer [to-oid]]
+  (:require [clj-consonant.git.coerce :refer [to-oid]]
             [clj-consonant.git.commit :as commit]
             [clj-consonant.git.tree :as git-tree]))
 
@@ -35,9 +34,6 @@
 
 (defn load-for-uuid [repo tree uuid]
   (some->> (load-all repo tree)
-           (print-and-return "> classes")
            (vals)
-           (print-and-return "> values")
            (filter #(some #{{:uuid uuid}} (:objects %)))
-           (print-and-return "> matching classes")
            (first)))
